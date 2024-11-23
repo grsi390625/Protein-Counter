@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">BitFit Part 2</string>
+    <string name="enter_entry_title">Food Name</string>
+    <string name="write_entry">Protein Amount (g)</string>
+    <string name="add">Add</string>
+</resources>
