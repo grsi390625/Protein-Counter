@@ -9,10 +9,15 @@ import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
+    private lateinit var bottomNavigationView: BottomNavigationView
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
         if (firebaseAuth.currentUser == null) {
             redirectToAuth()
         }
+    }
+
+    companion object {
+        private const val KEY_SELECTED_TAB = "selected_tab"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         }
         setContentView(R.layout.activity_main)
 
-        val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottom_navigation)
+        bottomNavigationView = findViewById(R.id.bottom_navigation)
         val addButton: Button = findViewById(R.id.addButton)
         val signOutButton: Button = findViewById(R.id.signOutButton)
 
@@ -43,8 +48,11 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        // Default selected fragment
-        bottomNavigationView.selectedItemId = R.id.entries
+        // BottomNavigationView restores its own checked item on recreation without
+        // re-notifying the listener, which would leave the visible tab and the loaded
+        // fragment out of sync; tracking the selection ourselves keeps them consistent.
+        val restoredTab = savedInstanceState?.getInt(KEY_SELECTED_TAB) ?: R.id.entries
+        bottomNavigationView.selectedItemId = restoredTab
 
         // Add button click listener
         addButton.setOnClickListener {
@@ -54,6 +62,13 @@ class MainActivity : AppCompatActivity() {
 
         signOutButton.setOnClickListener {
             auth.signOut()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (::bottomNavigationView.isInitialized) {
+            outState.putInt(KEY_SELECTED_TAB, bottomNavigationView.selectedItemId)
         }
     }
 

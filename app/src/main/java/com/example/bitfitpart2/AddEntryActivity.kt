@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import com.google.firebase.auth.FirebaseAuth
@@ -17,6 +18,7 @@ class AddEntryActivity : AppCompatActivity() {
     private lateinit var saveErrorText: TextView
     private lateinit var saveProgressBar: ProgressBar
     private var editingEntryId: String? = null
+    private var isSaving = false
     private val repository = EntryRepository()
 
     companion object {
@@ -51,6 +53,8 @@ class AddEntryActivity : AppCompatActivity() {
     }
 
     private fun attemptSave() {
+        if (isSaving) return
+
         val foodName = foodNameEntry.text.toString().trim()
         val proteinAmount = proteinAmountEntry.text.toString().toDoubleOrNull()
 
@@ -64,6 +68,7 @@ class AddEntryActivity : AppCompatActivity() {
             return
         }
 
+        isSaving = true
         hideSaveError()
         setSaving(true)
 
@@ -74,12 +79,18 @@ class AddEntryActivity : AppCompatActivity() {
             repository.addEntry(uid, foodName, proteinAmount!!)
         }
 
-        task.addOnSuccessListener {
-            finish()
-        }.addOnFailureListener { exception ->
-            setSaving(false)
-            showSaveError(getString(R.string.error_save_failed, exception.message ?: ""))
+        // Firestore's write Task only resolves on server ack, which can hang indefinitely
+        // offline; the local cache (and the list screen's pending indicator) already reflects
+        // the write immediately, so we close here instead of blocking on that Task.
+        val appContext = applicationContext
+        task.addOnFailureListener { exception ->
+            Toast.makeText(
+                appContext,
+                appContext.getString(R.string.error_save_failed, exception.message ?: ""),
+                Toast.LENGTH_LONG
+            ).show()
         }
+        finish()
     }
 
     private fun setSaving(isSaving: Boolean) {

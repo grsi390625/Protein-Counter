@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BitFit Part 2</string>
+    <string name="app_name">Protein Counter</string>
     <string name="enter_entry_title">Food Name</string>
     <string name="write_entry">Protein Amount (g)</string>
     <string name="add">Add</string>
@@ -40,4 +40,5 @@
     <string name="error_loading_entries">Couldn\'t load your entries. Check your connection and try again.</string>
     <string name="error_delete_failed">Couldn\'t delete this entry: %1$s</string>
     <string name="error_save_failed">Couldn\'t save this entry: %1$s</string>
+    <string name="syncing_changes">Syncing changes…</string>
 </resources>

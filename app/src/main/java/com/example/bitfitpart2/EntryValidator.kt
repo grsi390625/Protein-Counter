@@ -26,7 +26,7 @@ object EntryValidator {
 
     fun validateProteinAmount(amount: Double?): ProteinAmountError? {
         return when {
-            amount == null -> ProteinAmountError.INVALID_NUMBER
+            amount == null || !amount.isFinite() -> ProteinAmountError.INVALID_NUMBER
             amount <= 0 -> ProteinAmountError.NOT_POSITIVE
             amount > MAX_PROTEIN_AMOUNT -> ProteinAmountError.TOO_LARGE
             else -> null

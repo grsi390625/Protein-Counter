@@ -11,7 +11,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
@@ -26,11 +28,16 @@ class EntryFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_entry, container, false)
+    ): View {
+        return inflater.inflate(R.layout.fragment_entry, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val searchEntry: EditText = view.findViewById(R.id.searchEntry)
         val recyclerView: RecyclerView = view.findViewById(R.id.entryRV)
         val emptyStateText: TextView = view.findViewById(R.id.emptyStateText)
+        val syncStatusText: TextView = view.findViewById(R.id.syncStatusText)
         val entryList = mutableListOf<DisplayEntry>()
         val adapter = EntryAdapter(
             entries = entryList,
@@ -50,40 +57,43 @@ class EntryFragment : Fragment() {
             recyclerView.visibility = View.GONE
             emptyStateText.text = getString(R.string.error_not_signed_in)
             emptyStateText.visibility = View.VISIBLE
-            return view
+            return
         }
 
-        lifecycleScope.launch {
-            combine(repository.observeEntries(uid), searchQuery) { result, rawQuery ->
-                Pair(result, rawQuery)
-            }.collect { (result, rawQuery) ->
-                when (result) {
-                    is EntriesResult.Loading -> Unit
-                    is EntriesResult.Error -> {
-                        entryList.clear()
-                        adapter.notifyDataSetChanged()
-                        recyclerView.visibility = View.GONE
-                        emptyStateText.text = getString(R.string.error_loading_entries)
-                        emptyStateText.visibility = View.VISIBLE
-                    }
-                    is EntriesResult.Success -> {
-                        val normalizedQuery = SearchQueryNormalizer.normalize(rawQuery)
-                        val filtered = result.entries.filter {
-                            SearchQueryNormalizer.matches(it.foodName, normalizedQuery)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                combine(repository.observeEntries(uid), searchQuery) { result, rawQuery ->
+                    Pair(result, rawQuery)
+                }.collect { (result, rawQuery) ->
+                    when (result) {
+                        is EntriesResult.Loading -> Unit
+                        is EntriesResult.Error -> {
+                            entryList.clear()
+                            adapter.notifyDataSetChanged()
+                            recyclerView.visibility = View.GONE
+                            syncStatusText.visibility = View.GONE
+                            emptyStateText.text = getString(R.string.error_loading_entries)
+                            emptyStateText.visibility = View.VISIBLE
                         }
-                        entryList.clear()
-                        entryList.addAll(filtered)
-                        adapter.notifyDataSetChanged()
+                        is EntriesResult.Success -> {
+                            val normalizedQuery = SearchQueryNormalizer.normalize(rawQuery)
+                            val filtered = result.entries.filter {
+                                SearchQueryNormalizer.matches(it.foodName, normalizedQuery)
+                            }
+                            entryList.clear()
+                            entryList.addAll(filtered)
+                            adapter.notifyDataSetChanged()
 
-                        val hasResults = filtered.isNotEmpty()
-                        recyclerView.visibility = if (hasResults) View.VISIBLE else View.GONE
-                        emptyStateText.text = getString(R.string.no_matching_entries)
-                        emptyStateText.visibility = if (hasResults) View.GONE else View.VISIBLE
+                            val hasResults = filtered.isNotEmpty()
+                            recyclerView.visibility = if (hasResults) View.VISIBLE else View.GONE
+                            emptyStateText.text = getString(R.string.no_matching_entries)
+                            emptyStateText.visibility = if (hasResults) View.GONE else View.VISIBLE
+                            syncStatusText.visibility = if (result.hasPendingWrites) View.VISIBLE else View.GONE
+                        }
                     }
                 }
             }
         }
-        return view
     }
 
     private fun openEditScreen(entry: DisplayEntry) {

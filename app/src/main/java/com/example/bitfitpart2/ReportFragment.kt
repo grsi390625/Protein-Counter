@@ -6,7 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
@@ -19,8 +21,12 @@ class ReportFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_report, container, false)
+    ): View {
+        return inflater.inflate(R.layout.fragment_report, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val generatedAtText: TextView = view.findViewById(R.id.reportGeneratedAtText)
         val recyclerView: RecyclerView = view.findViewById(R.id.reportRV)
         val emptyStateText: TextView = view.findViewById(R.id.reportEmptyStateText)
@@ -40,33 +46,34 @@ class ReportFragment : Fragment() {
             recyclerView.visibility = View.GONE
             emptyStateText.text = getString(R.string.error_not_signed_in)
             emptyStateText.visibility = View.VISIBLE
-            return view
+            return
         }
 
-        lifecycleScope.launch {
-            repository.observeEntries(uid).collect { result ->
-                when (result) {
-                    is EntriesResult.Loading -> Unit
-                    is EntriesResult.Error -> {
-                        entryList.clear()
-                        adapter.notifyDataSetChanged()
-                        recyclerView.visibility = View.GONE
-                        emptyStateText.text = getString(R.string.error_loading_entries)
-                        emptyStateText.visibility = View.VISIBLE
-                    }
-                    is EntriesResult.Success -> {
-                        entryList.clear()
-                        entryList.addAll(result.entries)
-                        adapter.notifyDataSetChanged()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                repository.observeEntries(uid).collect { result ->
+                    when (result) {
+                        is EntriesResult.Loading -> Unit
+                        is EntriesResult.Error -> {
+                            entryList.clear()
+                            adapter.notifyDataSetChanged()
+                            recyclerView.visibility = View.GONE
+                            emptyStateText.text = getString(R.string.error_loading_entries)
+                            emptyStateText.visibility = View.VISIBLE
+                        }
+                        is EntriesResult.Success -> {
+                            entryList.clear()
+                            entryList.addAll(result.entries)
+                            adapter.notifyDataSetChanged()
 
-                        val hasResults = result.entries.isNotEmpty()
-                        recyclerView.visibility = if (hasResults) View.VISIBLE else View.GONE
-                        emptyStateText.text = getString(R.string.no_entries_for_report)
-                        emptyStateText.visibility = if (hasResults) View.GONE else View.VISIBLE
+                            val hasResults = result.entries.isNotEmpty()
+                            recyclerView.visibility = if (hasResults) View.VISIBLE else View.GONE
+                            emptyStateText.text = getString(R.string.no_entries_for_report)
+                            emptyStateText.visibility = if (hasResults) View.GONE else View.VISIBLE
+                        }
                     }
                 }
             }
         }
-        return view
     }
 }

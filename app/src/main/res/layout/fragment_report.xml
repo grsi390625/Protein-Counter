@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:text="@string/report_title"
-        android:textColor="@color/black"
+        android:textColor="?attr/colorOnSurface"
         android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
-        android:textColor="@color/black"
+        android:textColor="?attr/colorOnSurface"
         android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/reportTitleText" />
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/report_column_food_name"
-            android:textColor="@color/black"
+            android:textColor="?attr/colorOnSurface"
             android:textStyle="bold" />
 
         <TextView
@@ -56,7 +56,7 @@
             android:layout_weight="1"
             android:gravity="end"
             android:text="@string/report_column_protein_amount"
-            android:textColor="@color/black"
+            android:textColor="?attr/colorOnSurface"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -76,7 +76,7 @@
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:text="@string/no_entries_for_report"
-        android:textColor="@color/black"
+        android:textColor="?attr/colorOnSurface"
         android:textSize="18sp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/reportHeaderRow"
