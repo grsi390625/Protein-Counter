@@ -12,5 +12,10 @@
         android:icon="@drawable/baseline_dashboard_24"
         android:title="Dashboard"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/report"
+        android:icon="@drawable/baseline_description_24"
+        android:title="Report"
+        app:showAsAction="ifRoom" />
 
 </menu>

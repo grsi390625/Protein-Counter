@@ -1,7 +1,7 @@
 package com.example.bitfitpart2
 
 data class DisplayEntry(
-    val id: Long?,
+    val id: String?,
     val foodName: String?,
     val proteinAmount: Double?
 )

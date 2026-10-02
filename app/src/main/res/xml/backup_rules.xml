@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
+   Backup rules for Android 6.0-11 (API 23-30). On Android 12+ (API 31+),
+   data_extraction_rules.xml governs backup/transfer instead and this file
+   is ignored there.
    See https://developer.android.com/guide/topics/data/autobackup
    for details.
-   Note: This file is ignored for devices older that API 31
-   See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <exclude domain="database" path="."/>
 </full-backup-content>

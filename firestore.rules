@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid}/entries/{entryId} {
+      allow read, delete: if isOwner(uid);
+      allow create: if isOwner(uid) && isValidNewEntry(request.resource.data);
+      allow update: if isOwner(uid) && isValidUpdatedEntry(request.resource.data, resource.data);
+    }
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function hasValidShape(data) {
+      return data.keys().hasOnly(['foodName', 'proteinAmount', 'createdAt'])
+        && data.keys().hasAll(['foodName', 'proteinAmount', 'createdAt'])
+        && data.foodName is string
+        && data.foodName.size() > 0
+        && data.foodName.size() <= 100
+        && data.foodName.matches('.*\\S.*')
+        && data.proteinAmount is number
+        && data.proteinAmount > 0
+        && data.proteinAmount <= 1000
+        && data.createdAt is timestamp;
+    }
+
+    function isValidNewEntry(data) {
+      return hasValidShape(data) && data.createdAt == request.time;
+    }
+
+    function isValidUpdatedEntry(newData, oldData) {
+      return hasValidShape(newData) && newData.createdAt == oldData.createdAt;
+    }
+  }
+}

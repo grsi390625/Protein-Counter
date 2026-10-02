@@ -13,3 +13,11 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Firebase CLI local artifacts
+.firebase/
+firebase-debug.log
+
+# Local Claude Code tooling (not part of the app or its build)
+.claude/
+CLAUDE.md

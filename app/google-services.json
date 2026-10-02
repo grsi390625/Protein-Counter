@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "200734192892",
+    "project_id": "claudepractice-95083",
+    "storage_bucket": "claudepractice-95083.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:200734192892:android:892ca30c036a320666d379",
+        "android_client_info": {
+          "package_name": "com.example.bitfitpart2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClMN6Jt8D0eWlbf0cKddhy92HyYM_nkro"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
